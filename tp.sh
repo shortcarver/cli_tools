@@ -9,5 +9,9 @@ elif [[ "$loc" = "cnflpr" ]]; then
 	cd ~/Code/cnflpr-org/
 elif [[ "$loc" = "sr" ]]; then
 	cd ~/Code/scenic_route/
+elif [[ "$loc" = "code" ]]; then
+	cd ~/Code/
+else
+	echo "Usage: tp [tp|nvim|cnflpr|sr|code]"
 fi
 

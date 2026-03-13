@@ -1,9 +1,9 @@
 #!/bin/bash
 
-autoload -Uz bashcompinit && bashcompinit
+# autoload -Uz bashcompinit && bashcompinit
 
 alias tp='. ~/.local/share/cli_tools/tp.sh'
-complete -W "cnflpr sr tp nvim vim" tp
+complete -W "cnflpr sr tp nvim vim code" tp
 
 
 
