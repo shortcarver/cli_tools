@@ -6,12 +6,11 @@ fi
 
 if [[ "$1" == "--profile" ]]; then
   asin="$3"
-  outFile="$4"
-  ext="$5"
+  ext="${4:-}"
   cmd=(audible --profile "$2")
 
-  if [[ -z "$2" || -z "$3" || -z "$4" ]]; then
-    echo "Usage: ./convert.sh [--profile <name>] <ASIN> <outFile> [--aax]"
+  if [[ -z "$2" || -z "$3" ]]; then
+    echo "Usage: ./convert.sh [--profile <name>] <ASIN> [--aax]"
     if [[ -z "$2" ]]; then
       audible library list
     else
@@ -19,22 +18,32 @@ if [[ "$1" == "--profile" ]]; then
     fi
     exit 1
   fi
+
+  if [[ -n "$ext" && "$ext" != "--aax" ]]; then
+    echo "Usage: ./convert.sh [--profile <name>] <ASIN> [--aax]"
+    exit 1
+  fi
 else
   asin="$1"
-  outFile="$2"
-  ext="$3"
+  ext="${2:-}"
   cmd=(audible)
 
-  if [[ -z "$1" || -z "$2" ]]; then
-    echo "Usage: ./convert.sh [--profile <name>] <ASIN> <outFile> [--aax]"
+  if [[ -z "$1" ]]; then
+    echo "Usage: ./convert.sh [--profile <name>] <ASIN> [--aax]"
     "${cmd[@]}" library list
+    exit 1
+  fi
+
+  if [[ -n "$ext" && "$ext" != "--aax" ]]; then
+    echo "Usage: ./convert.sh [--profile <name>] <ASIN> [--aax]"
     exit 1
   fi
 fi
 
 set -euo pipefail
 
-dir="$PWD"
+dir="$PWD/$asin"
+mkdir -p "$dir"
 
 if [ "$ext" == "--aax" ]; then
   aax="--aax-fallback"
@@ -43,6 +52,15 @@ else
 fi
 
 "${cmd[@]}" download -a "$asin" "$aax" --cover --cover-size 1215 --chapter -o "$dir"
+
+chapters_json=$(find "$dir" -maxdepth 1 -name "*-chapters.json" -print -quit 2>/dev/null)
+if [[ -z "$chapters_json" ]]; then
+  echo "Error: could not find *-chapters.json in $dir"
+  exit 1
+fi
+item_name="${chapters_json##*/}"
+item_name="${item_name%-chapters.json}"
+outFile="$dir/$item_name.mp3"
 
 info=$("${cmd[@]}" api -p response_groups="media,contributors,series,category_ladders" /1.0/library/"$asin" | jq '.item')
 
@@ -87,7 +105,7 @@ series-part=$(echo "$series_info" | jq -r '.sequence')
 fi
 
 # Write chapter timestamps to txt
-json_file=$(find "$dir" -maxdepth 1 -name "*.json" -print -quit 2>/dev/null)
+json_file="$chapters_json"
 jq -r 'def flat:
   reduce .[] as $c ([]; if $c.chapters? then .+[$c | del(.chapters)]+[$c.chapters | flat] else .+[$c] end) | flatten;
     .content_metadata.chapter_info.chapters
