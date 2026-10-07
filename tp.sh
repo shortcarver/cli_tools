@@ -11,6 +11,8 @@ elif [[ "$loc" = "sr" ]]; then
 	cd ~/Code/scenic_route/
 elif [[ "$loc" = "code" ]]; then
 	cd ~/Code/
+elif [[ "$loc" = "pi" ]]; then
+	cd ~/Code/pi-shortcarver/
 else
 	echo "Usage: tp [tp|nvim|cnflpr|sr|code]"
 fi

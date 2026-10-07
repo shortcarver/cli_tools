@@ -1,0 +1,34 @@
+autoload -Uz compinit && compinit
+source ~/.local/share/cli_tools/setup.sh
+
+# Prompt Configuration — Rosé Pine (main)
+COLOR_DEF='%f'
+COLOR_USR='%F{#c4a7e7}'    # iris
+COLOR_DIR='%F{#ebbcba}'    # rose
+COLOR_GIT='%F{#9ccfd8}'    # foam
+COLOR_PROMPT='%F{#f6c177}' # gold
+COLOR_STAGED='%F{#f6c177}' # gold
+COLOR_DIRTY='%F{#eb6f92}'  # love
+
+# Autoload zsh add-zsh-hook and vcs_info functions (-U autoload w/o substition, -z use zsh style)
+autoload -Uz add-zsh-hook vcs_info
+# Enable substitution in the prompt.
+setopt prompt_subst
+# Run vcs_info just before a prompt is displayed (precmd)
+add-zsh-hook precmd vcs_info
+# add ${vcs_info_msg_0} to the prompt
+# e.g. here we add the Git information in red  
+export PROMPT='${COLOR_USR}%n ${COLOR_DIR}%~ ${COLOR_GIT}${vcs_info_msg_0_} ${COLOR_PROMPT}%%${COLOR_DEF} '
+
+# Enable checking for (un)staged changes, enabling use of %u and %c
+zstyle ':vcs_info:*' check-for-changes true
+# Set custom strings for an unstaged vcs repo changes (*) and staged changes (+)
+zstyle ':vcs_info:*' unstagedstr " ${COLOR_DIRTY}*${COLOR_GIT}"
+zstyle ':vcs_info:*' stagedstr " ${COLOR_STAGED}+${COLOR_GIT}"
+# Set the format of the Git information for vcs_info
+zstyle ':vcs_info:git:*' formats       '(%b%u%c)'
+zstyle ':vcs_info:git:*' actionformats '(%b|%a%u%c)'
+
+
+alias vim=nvim
+alias git-latest="git branch --sort=committerdate"
